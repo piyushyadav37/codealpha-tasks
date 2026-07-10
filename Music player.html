@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nocturne — Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:        #0f1210;
+    --panel:      #171b18;
+    --panel-2:    #1f2420;
+    --amber:      #d9a441;
+    --amber-dim:  #a97f38;
+    --moss:       #6b8f71;
+    --cream:      #f2ead9;
+    --cream-dim:  #cfc4a8;
+    --line:       rgba(242,234,217,0.09);
+    --radius:     14px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(1200px 700px at 15% -10%, #232922 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 110%, #1c231d 0%, transparent 55%),
+      var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    color:var(--cream);
+    padding:32px 16px;
+  }
+
+  .player{
+    width:100%;
+    max-width:880px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:22px;
+    overflow:hidden;
+    display:grid;
+    grid-template-columns:340px 1fr;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,0.7);
+  }
+
+  /* ---------- LEFT: STAGE ---------- */
+  .stage{
+    position:relative;
+    padding:36px 30px 30px;
+    background:
+      linear-gradient(180deg, rgba(217,164,65,0.07), transparent 40%),
+      var(--panel-2);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+  }
+
+  .eyebrow{
+    align-self:flex-start;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--amber-dim);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px;height:6px;border-radius:50%;
+    background:var(--moss);
+    box-shadow:0 0 0 0 rgba(107,143,113,.6);
+  }
+  .eyebrow.live::before{ animation:pulse 1.8s infinite; }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(107,143,113,.55); }
+    70%{ box-shadow:0 0 0 8px rgba(107,143,113,0); }
+    100%{ box-shadow:0 0 0 0 rgba(107,143,113,0); }
+  }
+
+  .disc-wrap{
+    position:relative;
+    width:230px; height:230px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .disc{
+    width:100%; height:100%;
+    border-radius:50%;
+    background:
+      repeating-radial-gradient(circle at center,
+        #14100b 0px, #14100b 2px,
+        #1b1712 3px, #1b1712 5px);
+    box-shadow:
+      0 0 0 1px rgba(242,234,217,0.06),
+      0 20px 40px -10px rgba(0,0,0,0.6),
+      inset 0 0 30px rgba(0,0,0,0.5);
+    display:flex; align-items:center; justify-content:center;
+    animation:spin 12s linear infinite;
+    animation-play-state:paused;
+  }
+  .disc.spinning{ animation-play-state:running; }
+  .disc::after{
+    content:"";
+    position:absolute;
+    width:64px;height:64px;
+    border-radius:50%;
+    background:linear-gradient(155deg, var(--amber), var(--amber-dim));
+    box-shadow:0 0 0 6px #14100b, 0 0 0 7px rgba(242,234,217,0.08);
+  }
+  .disc::before{
+    content:"";
+    position:absolute;
+    width:10px;height:10px;
+    border-radius:50%;
+    background:#14100b;
+    z-index:2;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .track-meta{
+    text-align:center;
+    width:100%;
+  }
+  .track-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    line-height:1.25;
+    margin:0 0 4px;
+    color:var(--cream);
+    letter-spacing:.2px;
+  }
+  .track-artist{
+    margin:0;
+    font-size:13.5px;
+    color:var(--cream-dim);
+    letter-spacing:.02em;
+  }
+
+  .stage-foot{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--cream-dim);
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    opacity:.7;
+  }
+
+  /* ---------- RIGHT: CONTROLS + PLAYLIST ---------- */
+  .side{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+
+  .controls{
+    padding:30px 32px 22px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .seek-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .time{
+    font-size:11.5px;
+    color:var(--cream-dim);
+    font-variant-numeric:tabular-nums;
+    width:38px;
+    flex-shrink:0;
+  }
+  .time.end{ text-align:right; }
+
+  input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:4px;
+    background:var(--line);
+    border-radius:4px;
+    outline:none;
+    cursor:pointer;
+  }
+  input[type="range"]#seek{
+    background:linear-gradient(to right, var(--amber) 0%, var(--amber) 0%, var(--line) 0%, var(--line) 100%);
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:13px; height:13px;
+    border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 0 3px rgba(217,164,65,0.18);
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  input[type="range"]:active::-webkit-slider-thumb{ transform:scale(1.15); }
+  input[type="range"]::-moz-range-thumb{
+    width:13px; height:13px; border:none; border-radius:50%;
+    background:var(--amber);
+    cursor:pointer;
+  }
+
+  .transport{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    margin-bottom:22px;
+  }
+  .btn{
+    background:none;
+    border:none;
+    color:var(--cream);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    transition:transform .15s ease, color .15s ease, opacity .15s ease;
+  }
+  .btn:hover{ color:var(--amber); transform:translateY(-1px); }
+  .btn:active{ transform:translateY(0) scale(.94); }
+  .btn svg{ width:18px; height:18px; }
+  .btn.skip svg{ width:20px; height:20px; }
+
+  .btn.play{
+    width:56px; height:56px;
+    border-radius:50%;
+    background:linear-gradient(155deg, var(--amber), var(--amber-dim));
+    color:var(--ink);
+    box-shadow:0 12px 26px -8px rgba(217,164,65,0.55);
+  }
+  .btn.play svg{ width:20px; height:20px; }
+  .btn.play:hover{ transform:translateY(-2px) scale(1.03); color:var(--ink); }
+
+  .btn.toggle{ color:var(--cream-dim); }
+  .btn.toggle.active{ color:var(--moss); }
+
+  .lower-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+  }
+  .volume{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:1;
+    max-width:170px;
+  }
+  .volume svg{ width:16px; height:16px; color:var(--cream-dim); flex-shrink:0; }
+  .mode-toggles{ display:flex; gap:14px; }
+
+  /* ---------- PLAYLIST ---------- */
+  .playlist{
+    padding:20px 14px 20px 14px;
+    overflow-y:auto;
+    flex:1;
+    min-height:220px;
+  }
+  .playlist-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:0 14px 12px;
+  }
+  .playlist-head h2{
+    font-family:'Fraunces', serif;
+    font-size:14px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:.03em;
+  }
+  .playlist-head span{
+    font-size:11px;
+    color:var(--cream-dim);
+  }
+
+  .track-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background .15s ease;
+    position:relative;
+  }
+  .track-item:hover{ background:rgba(242,234,217,0.04); }
+  .track-item.active{ background:rgba(217,164,65,0.1); }
+
+  .track-num{
+    width:20px;
+    font-size:12px;
+    color:var(--cream-dim);
+    font-variant-numeric:tabular-nums;
+    flex-shrink:0;
+    text-align:center;
+  }
+  .track-item.active .track-num{ color:transparent; position:relative; }
+  .eq{
+    display:none;
+    gap:2px;
+    align-items:flex-end;
+    height:14px;
+    width:20px;
+    position:absolute;
+    left:14px;
+  }
+  .track-item.active .eq{ display:flex; }
+  .eq span{
+    width:3px;
+    background:var(--amber);
+    border-radius:1px;
+    animation:eq 0.9s ease-in-out infinite;
+  }
+  .eq span:nth-child(1){ animation-delay:-0.6s; }
+  .eq span:nth-child(2){ animation-delay:-0.2s; }
+  .eq span:nth-child(3){ animation-delay:-0.8s; }
+  @keyframes eq{
+    0%,100%{ height:3px; }
+    50%{ height:13px; }
+  }
+
+  .track-item-info{ flex:1; min-width:0; }
+  .track-item-info p{ margin:0; font-size:13.5px; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .track-item-info span{ font-size:11.5px; color:var(--cream-dim); }
+  .track-item.active .track-item-info p{ color:var(--amber); }
+
+  .track-len{
+    font-size:11.5px;
+    color:var(--cream-dim);
+    font-variant-numeric:tabular-nums;
+    flex-shrink:0;
+  }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  ::-webkit-scrollbar-thumb{ background:rgba(242,234,217,0.12); border-radius:8px; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:720px){
+    .player{
+      grid-template-columns:1fr;
+      max-width:420px;
+    }
+    .stage{
+      border-right:none;
+      border-bottom:1px solid var(--line);
+      padding:28px 24px 24px;
+    }
+    .disc-wrap{ width:170px; height:170px; }
+    .disc::after{ width:48px; height:48px; }
+    .playlist{ max-height:260px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="player">
+
+  <!-- STAGE -->
+  <div class="stage">
+    <div class="eyebrow" id="eyebrow">Standing by</div>
+
+    <div class="disc-wrap">
+      <div class="disc" id="disc"></div>
+    </div>
+
+    <div class="track-meta">
+      <p class="track-title" id="title">—</p>
+      <p class="track-artist" id="artist">—</p>
+    </div>
+
+    <div class="stage-foot">
+      <span id="trackPos">Track 1 / 1</span>
+      <span id="bitrateTag">Nocturne</span>
+    </div>
+  </div>
+
+  <!-- SIDE -->
+  <div class="side">
+    <div class="controls">
+
+      <div class="seek-row">
+        <span class="time" id="curTime">0:00</span>
+        <input type="range" id="seek" value="0" min="0" max="100" step="0.1">
+        <span class="time end" id="durTime">0:00</span>
+      </div>
+
+      <div class="transport">
+        <button class="btn toggle" id="shuffleBtn" title="Shuffle" aria-label="Shuffle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+        </button>
+        <button class="btn skip" id="prevBtn" title="Previous" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM9.5 12l10-7v14z"/></svg>
+        </button>
+        <button class="btn play" id="playBtn" title="Play" aria-label="Play">
+          <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="btn skip" id="nextBtn" title="Next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM4.5 5l10 7-10 7z"/></svg>
+        </button>
+        <button class="btn toggle active" id="repeatBtn" title="Autoplay next" aria-label="Repeat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </button>
+      </div>
+
+      <div class="lower-row">
+        <div class="volume">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+          <input type="range" id="volume" min="0" max="100" value="70">
+        </div>
+      </div>
+    </div>
+
+    <div class="playlist" id="playlist">
+      <div class="playlist-head">
+        <h2>Playlist</h2>
+        <span id="countTag">0 tracks</span>
+      </div>
+      <div id="trackList"></div>
+    </div>
+  </div>
+
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+(function(){
+  const tracks = [
+    {
+      title: "Amber Static",
+      artist: "Halyard",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+    },
+    {
+      title: "Low Tide Radio",
+      artist: "Marrow & Kin",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+    },
+    {
+      title: "Copper Line",
+      artist: "Halyard",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+    },
+    {
+      title: "Slow Rooms",
+      artist: "Ochre Fields",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+    },
+    {
+      title: "Nightbus",
+      artist: "Marrow & Kin",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
+    },
+    {
+      title: "Paper Weather",
+      artist: "Ochre Fields",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
+    }
+  ];
+
+  const audio       = document.getElementById('audio');
+  const playBtn     = document.getElementById('playBtn');
+  const playIcon    = document.getElementById('playIcon');
+  const prevBtn     = document.getElementById('prevBtn');
+  const nextBtn     = document.getElementById('nextBtn');
+  const shuffleBtn  = document.getElementById('shuffleBtn');
+  const repeatBtn   = document.getElementById('repeatBtn');
+  const seek        = document.getElementById('seek');
+  const volume      = document.getElementById('volume');
+  const curTimeEl   = document.getElementById('curTime');
+  const durTimeEl   = document.getElementById('durTime');
+  const titleEl     = document.getElementById('title');
+  const artistEl    = document.getElementById('artist');
+  const disc        = document.getElementById('disc');
+  const eyebrow     = document.getElementById('eyebrow');
+  const trackPos    = document.getElementById('trackPos');
+  const trackList   = document.getElementById('trackList');
+  const countTag    = document.getElementById('countTag');
+
+  const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+  const ICON_PAUSE = '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
+
+  let current = 0;
+  let isPlaying = false;
+  let shuffle = false;
+  let autoplayNext = true;
+
+  function fmt(t){
+    if (!isFinite(t) || t < 0) return "0:00";
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function buildPlaylist(){
+    trackList.innerHTML = '';
+    countTag.textContent = `${tracks.length} tracks`;
+    tracks.forEach((t, i) => {
+      const row = document.createElement('div');
+      row.className = 'track-item';
+      row.dataset.index = i;
+      row.innerHTML = `
+        <span class="track-num">${i + 1}</span>
+        <span class="eq"><span></span><span></span><span></span></span>
+        <div class="track-item-info">
+          <p>${t.title}</p>
+          <span>${t.artist}</span>
+        </div>
+        <span class="track-len" data-len="${i}">--:--</span>
+      `;
+      row.addEventListener('click', () => loadTrack(i, true));
+      trackList.appendChild(row);
+    });
+    refreshActiveRow();
+  }
+
+  function refreshActiveRow(){
+    document.querySelectorAll('.track-item').forEach(el => {
+      el.classList.toggle('active', Number(el.dataset.index) === current);
+    });
+  }
+
+  function loadTrack(index, autoplay){
+    current = ((index % tracks.length) + tracks.length) % tracks.length;
+    const t = tracks[current];
+    audio.src = t.src;
+    titleEl.textContent = t.title;
+    artistEl.textContent = t.artist;
+    trackPos.textContent = `Track ${current + 1} / ${tracks.length}`;
+    refreshActiveRow();
+    seek.value = 0;
+    seek.style.background = `linear-gradient(to right, var(--amber) 0%, var(--amber) 0%, var(--line) 0%, var(--line) 100%)`;
+    curTimeEl.textContent = "0:00";
+    durTimeEl.textContent = "0:00";
+    if (autoplay) {
+      audio.play().catch(()=>{});
+    }
+  }
+
+  function setPlayingUI(playing){
+    isPlaying = playing;
+    playIcon.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+    playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    disc.classList.toggle('spinning', playing);
+    eyebrow.textContent = playing ? 'Now playing' : 'Paused';
+    eyebrow.classList.toggle('live', playing);
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (audio.paused) { audio.play().catch(()=>{}); }
+    else { audio.pause(); }
+  });
+
+  audio.addEventListener('play', () => setPlayingUI(true));
+  audio.addEventListener('pause', () => setPlayingUI(false));
+
+  prevBtn.addEventListener('click', () => {
+    if (audio.currentTime > 4) { audio.currentTime = 0; return; }
+    stepTrack(-1);
+  });
+  nextBtn.addEventListener('click', () => stepTrack(1));
+
+  function stepTrack(dir){
+    let idx;
+    if (shuffle) {
+      do { idx = Math.floor(Math.random() * tracks.length); }
+      while (idx === current && tracks.length > 1);
+    } else {
+      idx = current + dir;
+    }
+    loadTrack(idx, true);
+  }
+
+  shuffleBtn.addEventListener('click', () => {
+    shuffle = !shuffle;
+    shuffleBtn.classList.toggle('active', shuffle);
+  });
+  repeatBtn.addEventListener('click', () => {
+    autoplayNext = !autoplayNext;
+    repeatBtn.classList.toggle('active', autoplayNext);
+    repeatBtn.title = autoplayNext ? 'Autoplay next: on' : 'Autoplay next: off';
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    durTimeEl.textContent = fmt(audio.duration);
+    seek.max = audio.duration || 0;
+    const lenTag = document.querySelector(`[data-len="${current}"]`);
+    if (lenTag) lenTag.textContent = fmt(audio.duration);
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    curTimeEl.textContent = fmt(audio.currentTime);
+    const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+    seek.value = audio.currentTime;
+    seek.style.background = `linear-gradient(to right, var(--amber) ${pct}%, var(--amber) ${pct}%, var(--line) ${pct}%, var(--line) 100%)`;
+  });
+
+  seek.addEventListener('input', () => {
+    audio.currentTime = seek.value;
+  });
+
+  audio.addEventListener('ended', () => {
+    if (autoplayNext) stepTrack(1);
+    else setPlayingUI(false);
+  });
+
+  volume.addEventListener('input', () => {
+    audio.volume = volume.value / 100;
+  });
+  audio.volume = volume.value / 100;
+
+  // Preload durations for playlist display
+  function preloadDurations(){
+    tracks.forEach((t, i) => {
+      const a = new Audio();
+      a.preload = 'metadata';
+      a.src = t.src;
+      a.addEventListener('loadedmetadata', () => {
+        const tag = document.querySelector(`[data-len="${i}"]`);
+        if (tag) tag.textContent = fmt(a.duration);
+      });
+    });
+  }
+
+  buildPlaylist();
+  loadTrack(0, false);
+  preloadDurations();
+})();
+</script>
+
+</body>
+</html>
