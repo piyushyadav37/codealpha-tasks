@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My AKSHU'S Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  /* ---------- basic page setup ---------- */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f3ead9;
+    margin: 0;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    color: #4a3b2f;
+    font-size: 42px;
+    margin-bottom: 6px;
+  }
+
+    p.subtitle {
+    color: #8a7563;
+    font-size: 15px;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+  /* ---------- category buttons ---------- */
+  .filter-buttons {
+    margin: 20px 0 35px;
+  }
+
+  .filter-buttons button {
+    padding: 10px 22px;
+    margin: 0 6px;
+    border: 1.5px solid #cbb89a;
+    background: transparent;
+    color: #5c4a3a;
+    border-radius: 30px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  .filter-buttons button:hover {
+    background: #e8dcc4;
+  }
+
+  .filter-buttons button.active {
+    background: #a97d50;
+    border-color: #a97d50;
+    color: #fff;
+  }
+
+  /* ---------- gallery grid ---------- */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .gallery img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #fff;
+    padding: 6px;
+    box-shadow: 0 4px 14px rgba(90, 70, 45, 0.15);
+    transition: transform .35s ease, box-shadow .35s ease, opacity .3s ease;
+  }
+
+  /* hover effect */
+  .gallery img:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 22px rgba(90, 70, 45, 0.25);
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  /* ---------- lightbox (popup view) ---------- */
+  .lightbox {
+    opacity:0;
+    visibility:hidden;
+    display:flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(35, 26, 18, 0.9);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .lightbox.show {
+    opacity:1;
+    visibility:visible;
+  }
+
+  .lightbox img {
+    max-width:80%;
+    max-height:70%;
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+    transform:scale(.92);
+    opacity:0;
+    transition:transform .35s ease,opacity .35s ease;
+  }
+  .lightbox.show img{transform:scale(1);opacity:1;}
+
+  .lightbox-buttons {
+    margin-top: 22px;
+  }
+
+  .lightbox-buttons button {
+    background: #a97d50;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    margin: 0 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-buttons button:hover {
+    background: #8f6640;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 24px;
+    right: 34px;
+    font-size: 32px;
+    color: #f3ead9;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .close-btn:hover {
+    color: #a97d50;
+  }
+
+  /* ---------- responsive: smaller screens ---------- */
+  @media (max-width: 500px) {
+    h1 {
+      font-size: 32px;
+    }
+    .gallery {
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+    }
+    .gallery img {
+      height: 140px;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+  <h1>My AKSHU'S Gallery</h1>
+  <p class="subtitle">Click any photo to view it bigger</p>
+
+  <!-- category filter buttons -->
+  <div class="filter-buttons">
+    <button class="active" onclick="filterImages('all', this)">All</button>
+    <button onclick="filterImages('Nature', this)">SHE</button>
+    <button onclick="filterImages('City', this)">HER PORTRAIT</button>
+    <button onclick="filterImages('Animals', this)">HER AESTHETICS</button>
+  </div>
+
+  <!-- image gallery -->
+  <div class="gallery" id="gallery">
+    <img src="https://picsum.photos/seed/nature1/400/300" data-category="nature" onclick="openLightbox(0)">
+    <img src="https://images.unsplash.com/photo-1758967905380-f62a8c8fd373?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-category="city" onclick="openLightbox(1)">
+    <img src="https://images.unsplash.com/photo-1497752531616-c3afd9760a11?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGFuaW1hbHN8ZW58MHx8MHx8fDA%3D" data-category="animals" onclick="openLightbox(2)">
+    <img src="https://picsum.photos/seed/nature2/400/300" data-category="nature" onclick="openLightbox(3)">
+    <img src="https://picsum.photos/seed/city2/400/300" data-category="city" onclick="openLightbox(4)">
+    <img src="https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8YW5pbWFsc3xlbnwwfHwwfHx8MA%3D%3D" data-category="animals" onclick="openLightbox(6)">
+    <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1244&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-category="city" onclick="openLightbox(7)">
+    <img src="https://images.unsplash.com/photo-1759681770982-313332e7f42c?q=80&w=1075&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-category="nature" onclick="openLightbox(8)">
+    <img src="https://images.unsplash.com/photo-1474511320723-9a56873867b5?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-category="animals" onclick="openLightbox(9)">
+    <img src="https://plus.unsplash.com/premium_photo-1673697239981-389164b7b87f?q=80&w=1144&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-category="nature" onclick="openLightbox(10)">
+    <img src="https://images.unsplash.com/photo-1444723121867-7a241cacace9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-category="city" onclick="openLightbox(11)">
+    <img src="https://images.unsplash.com/photo-1529778873920-4da4926a72c2?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" data-category="animals" onclick="openLightbox(11)">
+
+  </div>
+
+  <!-- lightbox popup -->
+  <div class="lightbox" id="lightbox">
+    <span class="close-btn" onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" src="">
+    <div class="lightbox-buttons">
+      <button onclick="changeImage(-1)">Prev</button>
+      <button onclick="changeImage(1)">Next</button>
+    </div>
+  </div>
+
+<script>
+const galleryImages=[...document.querySelectorAll('.gallery img')];
+galleryImages.forEach((img,i)=>img.setAttribute('onclick',`openLightbox(${i})`));
+let currentIndex=0;
+function update(){const img=document.getElementById('lightbox-img');img.style.opacity=0;img.style.transform='scale(.96)';setTimeout(()=>{img.src=galleryImages[currentIndex].src;img.onload=()=>{img.style.opacity=1;img.style.transform='scale(1)';};},120);}
+function openLightbox(i){currentIndex=i;update();document.getElementById('lightbox').classList.add('show');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('show');}
+function changeImage(d){
+ const visible=galleryImages.filter(x=>!x.classList.contains('hidden'));
+ let vi=visible.indexOf(galleryImages[currentIndex]);
+ vi=(vi+d+visible.length)%visible.length;
+ currentIndex=galleryImages.indexOf(visible[vi]);update();
+}
+function filterImages(cat,btn){
+ document.querySelectorAll('.filter-buttons button').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ galleryImages.forEach(img=>img.classList.toggle('hidden',!(cat==='all'||img.dataset.category===cat)));
+}
+document.addEventListener('keydown',e=>{
+ if(!document.getElementById('lightbox').classList.contains('show'))return;
+ if(e.key==='ArrowRight')changeImage(1);
+ if(e.key==='ArrowLeft')changeImage(-1);
+ if(e.key==='Escape')closeLightbox();
+ if(e.key==='Home'){currentIndex=0;update();}
+ if(e.key==='End'){currentIndex=galleryImages.length-1;update();}
+});
+document.getElementById('lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox();});
+let sx=0;
+lightbox.addEventListener('touchstart',e=>sx=e.changedTouches[0].screenX);
+lightbox.addEventListener('touchend',e=>{let ex=e.changedTouches[0].screenX;if(sx-ex>50)changeImage(1);if(ex-sx>50)changeImage(-1);});
+</script>
+
+</body>
+</html>
